@@ -1,15 +1,41 @@
 use std::io::Write;
 
-use crate::graph::{
-    AddArcError, AddRibError, BaseGraph, DirectedGraph, RemoveArcError,
-    RemoveDirectedGraphNodeError, RemoveUndirectedGraphNodeError, UndirectedGraph,
+use crate::{
+    files::{GraphSave, load_graph, save_graph},
+    graph::{
+        AddArcError, AddRibError, BaseGraph, DirectedGraph, RemoveArcError,
+        RemoveDirectedGraphNodeError, RemoveUndirectedGraphNodeError, UndirectedGraph,
+    },
 };
 
+pub mod files;
 pub mod graph;
 
 fn main() {
-    let directed = ask_bool("Будет ли граф ориентированным");
-    let graph: BaseGraph<i32> = BaseGraph::new();
+    let load_from_file = ask_bool("Загрузить граф из файла");
+    let (directed, graph) = if load_from_file {
+        loop {
+            print!("Введите путь к файлу: ");
+            std::io::stdout().flush().unwrap();
+
+            let mut input = String::new();
+            std::io::stdin().read_line(&mut input).unwrap();
+
+            let path = input.trim();
+            match load_graph(path) {
+                Ok(graph_save) => {
+                    print_graph(&graph_save.graph);
+                    break (graph_save.directed, graph_save.graph);
+                }
+                Err(e) => eprintln!("Ошибка загрузки графа: {}", e),
+            };
+        }
+    } else {
+        (
+            ask_bool("Будет ли граф ориентированным"),
+            BaseGraph::<i32>::new(),
+        )
+    };
     command_loop(graph, directed);
 }
 
@@ -276,6 +302,23 @@ fn command_loop(mut graph: BaseGraph<i32>, directed: bool) {
                         }
                     },
                 }
+            }
+            "save" => {
+                let Some(path) = input.next() else {
+                    eprintln!("Вы должны указать путь для сохранения графа");
+                    continue;
+                };
+                if let Err(e) = save_graph(
+                    &GraphSave {
+                        directed,
+                        graph: graph.clone(),
+                    },
+                    path,
+                ) {
+                    eprintln!("Ошибка при сохранении графа: {e}");
+                    continue;
+                }
+                println!("Граф успешно сохранен в {}", path);
             }
             "exit" => {
                 println!("Good luck with that!");

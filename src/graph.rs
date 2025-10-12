@@ -1,16 +1,17 @@
 use std::collections::{HashMap, HashSet};
 
 use derivative::Derivative;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 // Сюда в будущем будут добавляться свойства рёбер/дуг
-#[derive(Derivative)]
+#[derive(Derivative, Serialize, Deserialize)]
 #[derivative(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Edge {
     pub node_id: usize,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct BaseGraph<T> {
     next_id: usize,
     nodes: HashMap<usize, T>,
