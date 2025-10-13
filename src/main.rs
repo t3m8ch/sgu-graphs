@@ -338,8 +338,7 @@ fn command_loop(mut graph: BaseGraph<i32>, directed: bool) {
                 };
                 let directed_graph: DirectedGraph<i32> = (&mut graph).into();
                 match directed_graph.in_degree(node_id) {
-                    // TODO: Исправить текст
-                    Ok(degree) => println!("Полустепень исхода вершины {} = {}", node_id, degree),
+                    Ok(degree) => println!("Полустепень захода вершины {} = {}", node_id, degree),
                     Err(e) => match e {
                         InDegreeError::NodeDoesNotExist => {
                             eprintln!("Вершина не существует")
