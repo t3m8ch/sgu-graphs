@@ -3,9 +3,9 @@ use std::io::Write;
 use crate::{
     files::{GraphSave, load_graph, save_graph},
     graph::{
-        AddArcError, AddRibError, BaseGraph, DirectedGraph, InDegreeError, OutDegreeError,
-        RemoveArcError, RemoveDirectedGraphNodeError, RemoveUndirectedGraphNodeError,
-        UndirectedGraph,
+        AddArcError, AddRibError, BaseGraph, DirectedGraph, InDegreeError,
+        NodesWithGreaterOutdegreeError, OutDegreeError, RemoveArcError,
+        RemoveDirectedGraphNodeError, RemoveUndirectedGraphNodeError, UndirectedGraph,
     },
 };
 
@@ -338,9 +338,32 @@ fn command_loop(mut graph: BaseGraph<i32>, directed: bool) {
                 };
                 let directed_graph: DirectedGraph<i32> = (&mut graph).into();
                 match directed_graph.in_degree(node_id) {
+                    // TODO: Исправить текст
                     Ok(degree) => println!("Полустепень исхода вершины {} = {}", node_id, degree),
                     Err(e) => match e {
                         InDegreeError::NodeDoesNotExist => {
+                            eprintln!("Вершина не существует")
+                        }
+                    },
+                }
+            }
+            "node_with_greater_outgree" => {
+                if !directed {
+                    eprintln!("Граф неориентированный, эта команда не поддерживается");
+                    continue;
+                }
+                let Some(node_id) = input.next().and_then(|s| s.parse().ok()) else {
+                    eprintln!("Вы должны указать вершину");
+                    continue;
+                };
+                let directed_graph: DirectedGraph<i32> = (&mut graph).into();
+                match directed_graph.nodes_with_greater_outdegree(node_id) {
+                    Ok(nodes) => println!(
+                        "Вершины, у которых полустепень захода больше, чем у {} = {:?}",
+                        node_id, nodes
+                    ),
+                    Err(e) => match e {
+                        NodesWithGreaterOutdegreeError::NodeDoesNotExist => {
                             eprintln!("Вершина не существует")
                         }
                     },

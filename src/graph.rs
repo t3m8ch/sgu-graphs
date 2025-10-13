@@ -139,6 +139,12 @@ pub enum InDegreeError {
     NodeDoesNotExist,
 }
 
+#[derive(Clone, Debug, Error)]
+pub enum NodesWithGreaterOutdegreeError {
+    #[error("Node does not exist")]
+    NodeDoesNotExist,
+}
+
 pub struct DirectedGraph<'a, T> {
     base_graph: &'a mut BaseGraph<T>,
 }
@@ -210,6 +216,25 @@ impl<'a, T> DirectedGraph<'a, T> {
             Err(InDegreeError::NodeDoesNotExist)
         } else {
             Ok(self.base_graph.to_edges(node_id).len())
+        }
+    }
+
+    // Задача 3. Ia
+    pub fn nodes_with_greater_outdegree(
+        &self,
+        node_id: usize,
+    ) -> Result<Vec<usize>, NodesWithGreaterOutdegreeError> {
+        if !self.base_graph.has_node(node_id) {
+            Err(NodesWithGreaterOutdegreeError::NodeDoesNotExist)
+        } else {
+            let node_outdegree = self.out_degree(node_id).unwrap();
+            Ok(self
+                .base_graph
+                .edges
+                .keys()
+                .map(|k| *k)
+                .filter(|k| *k != node_id && self.out_degree(*k).unwrap() > node_outdegree)
+                .collect())
         }
     }
 }
