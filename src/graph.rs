@@ -127,6 +127,18 @@ pub enum RemoveArcError {
     ArcDoesNotExist,
 }
 
+#[derive(Clone, Debug, Error)]
+pub enum OutDegreeError {
+    #[error("Node does not exist")]
+    NodeDoesNotExist,
+}
+
+#[derive(Clone, Debug, Error)]
+pub enum InDegreeError {
+    #[error("Node does not exist")]
+    NodeDoesNotExist,
+}
+
 pub struct DirectedGraph<'a, T> {
     base_graph: &'a mut BaseGraph<T>,
 }
@@ -180,6 +192,24 @@ impl<'a, T> DirectedGraph<'a, T> {
         } else {
             self.base_graph.remove_edge(from, to);
             Ok(())
+        }
+    }
+
+    // Задача 2. Iа
+    pub fn out_degree(&self, node_id: usize) -> Result<usize, OutDegreeError> {
+        if !self.base_graph.has_node(node_id) {
+            Err(OutDegreeError::NodeDoesNotExist)
+        } else {
+            Ok(self.base_graph.from_edges(node_id).len())
+        }
+    }
+
+    // Задача 2. Iа
+    pub fn in_degree(&self, node_id: usize) -> Result<usize, InDegreeError> {
+        if !self.base_graph.has_node(node_id) {
+            Err(InDegreeError::NodeDoesNotExist)
+        } else {
+            Ok(self.base_graph.to_edges(node_id).len())
         }
     }
 }

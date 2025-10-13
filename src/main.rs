@@ -3,8 +3,9 @@ use std::io::Write;
 use crate::{
     files::{GraphSave, load_graph, save_graph},
     graph::{
-        AddArcError, AddRibError, BaseGraph, DirectedGraph, RemoveArcError,
-        RemoveDirectedGraphNodeError, RemoveUndirectedGraphNodeError, UndirectedGraph,
+        AddArcError, AddRibError, BaseGraph, DirectedGraph, InDegreeError, OutDegreeError,
+        RemoveArcError, RemoveDirectedGraphNodeError, RemoveUndirectedGraphNodeError,
+        UndirectedGraph,
     },
 };
 
@@ -299,6 +300,48 @@ fn command_loop(mut graph: BaseGraph<i32>, directed: bool) {
                         }
                         RemoveArcError::ArcDoesNotExist => {
                             eprintln!("Дуги между вершинами не существует")
+                        }
+                    },
+                }
+            }
+            "out_degree" => {
+                if !directed {
+                    eprintln!(
+                        "Граф неориентированный, получение полустепени исхода не поддерживается"
+                    );
+                    continue;
+                }
+                let Some(node_id) = input.next().and_then(|s| s.parse().ok()) else {
+                    eprintln!("Вы должны указать вершину");
+                    continue;
+                };
+                let directed_graph: DirectedGraph<i32> = (&mut graph).into();
+                match directed_graph.out_degree(node_id) {
+                    Ok(degree) => println!("Полустепень исхода вершины {} = {}", node_id, degree),
+                    Err(e) => match e {
+                        OutDegreeError::NodeDoesNotExist => {
+                            eprintln!("Вершина не существует")
+                        }
+                    },
+                }
+            }
+            "in_degree" => {
+                if !directed {
+                    eprintln!(
+                        "Граф неориентированный, получение полустепени захода не поддерживается"
+                    );
+                    continue;
+                }
+                let Some(node_id) = input.next().and_then(|s| s.parse().ok()) else {
+                    eprintln!("Вы должны указать вершину");
+                    continue;
+                };
+                let directed_graph: DirectedGraph<i32> = (&mut graph).into();
+                match directed_graph.in_degree(node_id) {
+                    Ok(degree) => println!("Полустепень исхода вершины {} = {}", node_id, degree),
+                    Err(e) => match e {
+                        InDegreeError::NodeDoesNotExist => {
+                            eprintln!("Вершина не существует")
                         }
                     },
                 }
