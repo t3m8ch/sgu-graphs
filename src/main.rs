@@ -368,6 +368,37 @@ fn command_loop(mut graph: BaseGraph<i32>, directed: bool) {
                     },
                 }
             }
+            "sym_diff" => {
+                let Some(first_path) = input.next() else {
+                    eprintln!("Вы должны указать путь для первого графа");
+                    continue;
+                };
+                let Some(second_path) = input.next() else {
+                    eprintln!("Вы должны указать путь для второго графа");
+                    continue;
+                };
+                let Ok(mut first_graph) = load_graph(first_path) else {
+                    eprintln!("Ошибка при загрузке первого графа: {}", first_path);
+                    continue;
+                };
+                let Ok(mut second_graph) = load_graph(second_path) else {
+                    eprintln!("Ошибка при загрузке второго графа: {}", second_path);
+                    continue;
+                };
+                if !first_graph.directed {
+                    eprintln!("Первый граф должен быть ориентированным");
+                    continue;
+                }
+                if !second_graph.directed {
+                    eprintln!("Второй граф должен быть ориентированным");
+                    continue;
+                }
+                let first_graph: DirectedGraph<i32> = (&mut first_graph.graph).into();
+                let second_graph: DirectedGraph<i32> = (&mut second_graph.graph).into();
+                graph = first_graph.symmetric_diff(&second_graph);
+
+                print_graph(&graph);
+            }
             "save" => {
                 let Some(path) = input.next() else {
                     eprintln!("Вы должны указать путь для сохранения графа");

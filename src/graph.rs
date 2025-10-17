@@ -89,6 +89,33 @@ impl<T> BaseGraph<T> {
             })
             .collect()
     }
+
+    // 4 задача
+    fn symmetric_diff(&self, other: &BaseGraph<T>) -> BaseGraph<T>
+    where
+        T: std::hash::Hash + std::cmp::Eq + Clone,
+    {
+        let self_nodes: HashSet<_> = self.nodes.clone().into_iter().collect();
+        let other_nodes: HashSet<_> = other.nodes.clone().into_iter().collect();
+        let nodes: HashMap<usize, T> = self_nodes.union(&other_nodes).cloned().collect();
+
+        let edges = self
+            .edges
+            .iter()
+            .filter_map(|(k, v1)| {
+                other
+                    .edges
+                    .get(&k)
+                    .map(|v2| (*k, v1.symmetric_difference(v2).cloned().collect()))
+            })
+            .collect();
+
+        BaseGraph {
+            next_id: 0,
+            nodes,
+            edges,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Error)]
@@ -236,6 +263,14 @@ impl<'a, T> DirectedGraph<'a, T> {
                 .filter(|k| *k != node_id && self.out_degree(*k).unwrap() > node_outdegree)
                 .collect())
         }
+    }
+
+    // Задача 4
+    pub fn symmetric_diff(&self, other: &DirectedGraph<'a, T>) -> BaseGraph<T>
+    where
+        T: std::clone::Clone + std::hash::Hash + std::cmp::Eq,
+    {
+        self.base_graph.symmetric_diff(other.base_graph).into()
     }
 }
 
