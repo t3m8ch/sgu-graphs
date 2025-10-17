@@ -116,6 +116,23 @@ impl<T> BaseGraph<T> {
             edges,
         }
     }
+
+    // 5 задача
+    pub fn dfs(&mut self, start: usize, mut f: impl FnMut(&T) -> ()) {
+        let mut stack = vec![start];
+        let mut visited = HashSet::new();
+        while let Some(node) = stack.pop() {
+            if visited.contains(&node) {
+                continue;
+            }
+
+            visited.insert(node);
+            f(self.nodes.get_mut(&node).unwrap());
+            for neighbor in self.edges.get(&node).unwrap() {
+                stack.push(neighbor.node_id);
+            }
+        }
+    }
 }
 
 #[derive(Clone, Debug, Error)]
@@ -358,5 +375,36 @@ impl<'a, T> UndirectedGraph<'a, T> {
             self.base_graph.remove_edge(second, first);
             Ok(())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_bfs() {
+        let mut graph: BaseGraph<usize> = BaseGraph::new();
+        for i in 0..=5 {
+            graph.add_node(i);
+        }
+
+        for (from_node, to_nodes) in [
+            (0, vec![1, 2]),
+            (1, vec![3, 4]),
+            (2, vec![5]),
+            (3, vec![]),
+            (4, vec![]),
+            (5, vec![]),
+        ] {
+            for to_node in to_nodes {
+                graph.add_edge(from_node, to_node);
+            }
+        }
+
+        let mut dfs = Vec::new();
+        graph.dfs(0, |node| dfs.push(*node));
+
+        assert_eq!(dfs, vec![0, 1, 4, 3, 2, 5]);
     }
 }
