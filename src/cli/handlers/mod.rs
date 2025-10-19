@@ -2,6 +2,7 @@ pub mod add_arc;
 pub mod add_node;
 pub mod add_rib;
 pub mod in_degree;
+pub mod is_acyclic;
 pub mod node_with_greater_outdegree;
 pub mod out_degree;
 pub mod remove_arc;
