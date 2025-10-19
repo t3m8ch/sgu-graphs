@@ -5,6 +5,7 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1.0.100"
+bon = "3.8.1"
 derivative = "2.2.0"
 maplit = "1.0.2"
 serde = { version = "1.0.228", features = ["derive"] }
