@@ -1,7 +1,7 @@
 use std::io::Write;
 
 use crate::{
-    cli::ask_bool::ask_bool,
+    cli::{ask_bool::ask_bool, print_graph::print_graph},
     files::{GraphSave, load_graph, save_graph},
     graph::{
         AddArcError, AddRibError, BaseGraph, DirectedGraph, InDegreeError,
@@ -442,12 +442,4 @@ fn save_cmd(
     }
     println!("Граф успешно сохранен в {}", path);
     Ok(true)
-}
-
-fn print_graph<T>(graph: &BaseGraph<T>) -> bool
-where
-    T: std::fmt::Debug + std::hash::Hash + Eq,
-{
-    println!("{graph:#?}");
-    true
 }
