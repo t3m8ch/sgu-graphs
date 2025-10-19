@@ -1,26 +1,28 @@
-use crate::graph::{BaseGraph, DirectedGraph, InDegreeError};
+use crate::{
+    graph::Graph,
+    tasks::task2::{IncomingNodesError, get_incoming_nodes},
+};
 
-pub fn in_degree_cmd(
-    cmd_parts: &[String],
-    graph: &mut BaseGraph<i32>,
-    directed: bool,
-) -> Result<bool, String> {
-    if !directed {
-        return Err(
-            "Граф неориентированный, получение полустепени захода не поддерживается".to_string(),
-        );
-    }
-    let Some(node_id) = cmd_parts.get(1).and_then(|s| s.parse().ok()) else {
+pub fn in_degree_cmd(cmd_parts: &[String], graph: &mut Graph) -> Result<bool, String> {
+    let Some(node) = cmd_parts.get(1).and_then(|s| s.parse().ok()) else {
         return Err("Вы должны указать вершину".to_string());
     };
-    let directed_graph: DirectedGraph<i32> = graph.into();
-    match directed_graph.in_degree(node_id) {
-        Ok(degree) => {
-            println!("Полустепень захода вершины {} = {}", node_id, degree);
+
+    match get_incoming_nodes(graph, node) {
+        Ok(incoming_nodes) => {
+            println!(
+                "Полустепень захода вершины {} = {}",
+                node,
+                incoming_nodes.len()
+            );
             Ok(true)
         }
         Err(e) => match e {
-            InDegreeError::NodeDoesNotExist => Err("Вершина не существует".to_string()),
+            IncomingNodesError::NodeDoesNotExist => Err("Вершина не существует".to_string()),
+            IncomingNodesError::UndirectedGraph => Err(
+                "Граф неориентированный, получение полустепени захода не поддерживается"
+                    .to_string(),
+            ),
         },
     }
 }

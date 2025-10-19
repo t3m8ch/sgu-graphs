@@ -1,28 +1,29 @@
-use crate::graph::{BaseGraph, DirectedGraph, NodesWithGreaterOutdegreeError};
+use crate::{
+    graph::Graph,
+    tasks::task3::{NodesWithGreaterOutdegreeError, get_nodes_with_greater_outdegree},
+};
 
 pub fn node_with_greater_outdegree_cmd(
     cmd_parts: &[String],
-    graph: &mut BaseGraph<i32>,
-    directed: bool,
+    graph: &mut Graph,
 ) -> Result<bool, String> {
-    if !directed {
-        return Err("Граф неориентированный, эта команда не поддерживается".to_string());
-    }
-    let Some(node_id) = cmd_parts.get(1).and_then(|s| s.parse().ok()) else {
+    let Some(node) = cmd_parts.get(1).and_then(|s| s.parse().ok()) else {
         return Err("Вы должны указать вершину".to_string());
     };
-    let directed_graph: DirectedGraph<i32> = graph.into();
-    match directed_graph.nodes_with_greater_outdegree(node_id) {
+    match get_nodes_with_greater_outdegree(graph, node) {
         Ok(nodes) => {
             println!(
                 "Вершины, у которых полустепень захода больше, чем у {} = {:?}",
-                node_id, nodes
+                node, nodes
             );
             Ok(true)
         }
         Err(e) => match e {
             NodesWithGreaterOutdegreeError::NodeDoesNotExist => {
                 Err("Вершина не существует".to_string())
+            }
+            NodesWithGreaterOutdegreeError::UndirectedGraph => {
+                Err("Граф должен быть ориентированным".to_string())
             }
         },
     }

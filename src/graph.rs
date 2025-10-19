@@ -8,301 +8,54 @@ use thiserror::Error;
 #[derive(Derivative, Serialize, Deserialize)]
 #[derivative(Clone, Debug, PartialEq, Eq, Hash)]
 pub struct Edge {
-    pub node_id: usize,
+    pub node: usize,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct BaseGraph<T> {
-    next_id: usize,
-    nodes: HashMap<usize, T>,
-    edges: HashMap<usize, HashSet<Edge>>,
-}
-
-impl<T> BaseGraph<T> {
-    pub fn new() -> Self {
-        BaseGraph {
-            next_id: 0,
-            nodes: HashMap::new(),
-            edges: HashMap::new(),
-        }
-    }
-
-    pub fn add_node(&mut self, value: T) -> usize {
-        let id = self.next_id;
-        self.next_id += 1;
-        self.nodes.insert(id, value);
-        self.edges.insert(id, HashSet::new());
-        id
-    }
-
-    fn remove_node(&mut self, id: usize) {
-        self.nodes.remove(&id);
-        self.edges.remove(&id);
-        for edge in self.edges.values_mut() {
-            edge.retain(|e| e.node_id != id);
-        }
-    }
-
-    fn add_edge(&mut self, from: usize, to: usize) {
-        self.edges
-            .entry(from)
-            .or_insert_with(HashSet::new)
-            .insert(Edge { node_id: to });
-    }
-
-    fn remove_edge(&mut self, from: usize, to: usize) {
-        if let Some(edges) = self.edges.get_mut(&from) {
-            edges.remove(&Edge { node_id: to });
-        }
-    }
-
-    fn has_node(&self, id: usize) -> bool {
-        self.nodes.contains_key(&id)
-    }
-
-    fn has_edge(&self, from: usize, to: usize) -> bool {
-        if let Some(edges) = self.edges.get(&from) {
-            edges.contains(&Edge { node_id: to })
-        } else {
-            false
-        }
-    }
-
-    fn from_edges(&self, id: usize) -> HashSet<usize> {
-        self.edges
-            .get(&id)
-            .unwrap_or(&HashSet::new())
-            .iter()
-            .map(|to| to.node_id)
-            .collect()
-    }
-
-    fn to_edges(&self, id: usize) -> HashSet<usize> {
-        self.edges
-            .iter()
-            .filter_map(|(from_node, to_nodes)| {
-                if to_nodes.contains(&Edge { node_id: id }) {
-                    Some(*from_node)
-                } else {
-                    None
-                }
-            })
-            .collect()
-    }
-
-    // 4 задача
-    fn symmetric_diff(&self, other: &BaseGraph<T>) -> BaseGraph<T>
-    where
-        T: std::hash::Hash + std::cmp::Eq + Clone,
-    {
-        let self_nodes: HashSet<_> = self.nodes.clone().into_iter().collect();
-        let other_nodes: HashSet<_> = other.nodes.clone().into_iter().collect();
-        let nodes: HashMap<usize, T> = self_nodes.union(&other_nodes).cloned().collect();
-
-        let edges = self
-            .edges
-            .iter()
-            .filter_map(|(k, v1)| {
-                other
-                    .edges
-                    .get(&k)
-                    .map(|v2| (*k, v1.symmetric_difference(v2).cloned().collect()))
-            })
-            .collect();
-
-        BaseGraph {
-            next_id: 0,
-            nodes,
-            edges,
-        }
-    }
-
-    // 5 задача
-    pub fn dfs(&mut self, start: usize, mut f: impl FnMut(&T) -> ()) {
-        let mut stack = vec![start];
-        let mut visited = HashSet::new();
-        while let Some(node) = stack.pop() {
-            if visited.contains(&node) {
-                continue;
-            }
-
-            visited.insert(node);
-            f(self.nodes.get_mut(&node).unwrap());
-            for neighbor in self.edges.get(&node).unwrap() {
-                stack.push(neighbor.node_id);
-            }
-        }
-    }
+pub struct Graph {
+    pub edges: HashMap<usize, HashSet<Edge>>,
+    pub directed: bool,
 }
 
 #[derive(Clone, Debug, Error)]
-pub enum RemoveDirectedGraphNodeError {
-    #[error("Node does not exist")]
-    NodeDoesNotExist,
-
-    #[error("Node has arcs")]
-    NodeHasArcs {
-        from: HashSet<usize>,
-        to: HashSet<usize>,
-    },
+pub enum GraphRemoveNodeError {
+    #[error("Node not found")]
+    NodeNotFound,
 }
 
 #[derive(Clone, Debug, Error)]
-pub enum AddArcError {
+pub enum GraphAddEdgeError {
     #[error("From node does not exist")]
     FromNodeDoesNotExist,
 
     #[error("To node does not exist")]
     ToNodeDoesNotExist,
 
-    #[error("Arc already exists")]
-    ArcAlreadyExists,
+    #[error("Graph is undirected")]
+    UndirectedGraph,
+
+    #[error("Edge already exists")]
+    EdgeAlreadyExists,
 }
 
 #[derive(Clone, Debug, Error)]
-pub enum RemoveArcError {
+pub enum GraphRemoveEdgeError {
     #[error("From node does not exist")]
     FromNodeDoesNotExist,
 
     #[error("To node does not exist")]
     ToNodeDoesNotExist,
 
-    #[error("Arc does not exist")]
-    ArcDoesNotExist,
+    #[error("Graph is undirected")]
+    UndirectedGraph,
+
+    #[error("Edge does not exist")]
+    EdgeDoesNotExist,
 }
 
 #[derive(Clone, Debug, Error)]
-pub enum OutDegreeError {
-    #[error("Node does not exist")]
-    NodeDoesNotExist,
-}
-
-#[derive(Clone, Debug, Error)]
-pub enum InDegreeError {
-    #[error("Node does not exist")]
-    NodeDoesNotExist,
-}
-
-#[derive(Clone, Debug, Error)]
-pub enum NodesWithGreaterOutdegreeError {
-    #[error("Node does not exist")]
-    NodeDoesNotExist,
-}
-
-pub struct DirectedGraph<'a, T> {
-    base_graph: &'a mut BaseGraph<T>,
-}
-
-impl<'a, T> Into<DirectedGraph<'a, T>> for &'a mut BaseGraph<T> {
-    fn into(self) -> DirectedGraph<'a, T> {
-        DirectedGraph { base_graph: self }
-    }
-}
-
-impl<'a, T> DirectedGraph<'a, T> {
-    pub fn remove_node(&mut self, id: usize) -> Result<(), RemoveDirectedGraphNodeError> {
-        if !self.base_graph.has_node(id) {
-            Err(RemoveDirectedGraphNodeError::NodeDoesNotExist)
-        } else {
-            let from_edges = self.base_graph.from_edges(id);
-            let to_edges = self.base_graph.to_edges(id);
-
-            if !from_edges.is_empty() || !to_edges.is_empty() {
-                Err(RemoveDirectedGraphNodeError::NodeHasArcs {
-                    from: from_edges,
-                    to: to_edges,
-                })
-            } else {
-                self.base_graph.remove_node(id);
-                Ok(())
-            }
-        }
-    }
-
-    pub fn add_arc(&mut self, from: usize, to: usize) -> Result<(), AddArcError> {
-        if !self.base_graph.has_node(from) {
-            Err(AddArcError::FromNodeDoesNotExist)
-        } else if !self.base_graph.has_node(to) {
-            Err(AddArcError::ToNodeDoesNotExist)
-        } else if self.base_graph.has_edge(from, to) {
-            Err(AddArcError::ArcAlreadyExists)
-        } else {
-            self.base_graph.add_edge(from, to);
-            Ok(())
-        }
-    }
-
-    pub fn remove_arc(&mut self, from: usize, to: usize) -> Result<(), RemoveArcError> {
-        if !self.base_graph.has_node(from) {
-            Err(RemoveArcError::FromNodeDoesNotExist)
-        } else if !self.base_graph.has_node(to) {
-            Err(RemoveArcError::ToNodeDoesNotExist)
-        } else if !self.base_graph.has_edge(from, to) {
-            Err(RemoveArcError::ArcDoesNotExist)
-        } else {
-            self.base_graph.remove_edge(from, to);
-            Ok(())
-        }
-    }
-
-    // Задача 2. Iа
-    pub fn out_degree(&self, node_id: usize) -> Result<usize, OutDegreeError> {
-        if !self.base_graph.has_node(node_id) {
-            Err(OutDegreeError::NodeDoesNotExist)
-        } else {
-            Ok(self.base_graph.from_edges(node_id).len())
-        }
-    }
-
-    // Задача 2. Iа
-    pub fn in_degree(&self, node_id: usize) -> Result<usize, InDegreeError> {
-        if !self.base_graph.has_node(node_id) {
-            Err(InDegreeError::NodeDoesNotExist)
-        } else {
-            Ok(self.base_graph.to_edges(node_id).len())
-        }
-    }
-
-    // Задача 3. Ia
-    pub fn nodes_with_greater_outdegree(
-        &self,
-        node_id: usize,
-    ) -> Result<Vec<usize>, NodesWithGreaterOutdegreeError> {
-        if !self.base_graph.has_node(node_id) {
-            Err(NodesWithGreaterOutdegreeError::NodeDoesNotExist)
-        } else {
-            let node_outdegree = self.out_degree(node_id).unwrap();
-            Ok(self
-                .base_graph
-                .edges
-                .keys()
-                .map(|k| *k)
-                .filter(|k| *k != node_id && self.out_degree(*k).unwrap() > node_outdegree)
-                .collect())
-        }
-    }
-
-    // Задача 4
-    pub fn symmetric_diff(&self, other: &DirectedGraph<'a, T>) -> BaseGraph<T>
-    where
-        T: std::clone::Clone + std::hash::Hash + std::cmp::Eq,
-    {
-        self.base_graph.symmetric_diff(other.base_graph).into()
-    }
-}
-
-#[derive(Debug, Clone, Error)]
-pub enum RemoveUndirectedGraphNodeError {
-    #[error("Node does not exist")]
-    NodeDoesNotExist,
-
-    #[error("Node has ribs")]
-    NodeHasRibs(HashSet<usize>),
-}
-
-#[derive(Debug, Clone, Error)]
-pub enum AddRibError {
-    #[error("First node does not exist")]
+pub enum GraphAddRibError {
+    #[error("From node does not exist")]
     FirstNodeDoesNotExist,
 
     #[error("Second node does not exist")]
@@ -312,8 +65,8 @@ pub enum AddRibError {
     RibAlreadyExists,
 }
 
-#[derive(Debug, Clone, Error)]
-pub enum RemoveRibError {
+#[derive(Clone, Debug, Error)]
+pub enum GraphRemoveRibError {
     #[error("First node does not exist")]
     FirstNodeDoesNotExist,
 
@@ -324,87 +77,131 @@ pub enum RemoveRibError {
     RibDoesNotExist,
 }
 
-pub struct UndirectedGraph<'a, T> {
-    base_graph: &'a mut BaseGraph<T>,
-}
-
-impl<'a, T> Into<UndirectedGraph<'a, T>> for &'a mut BaseGraph<T> {
-    fn into(self) -> UndirectedGraph<'a, T> {
-        UndirectedGraph { base_graph: self }
-    }
-}
-
-impl<'a, T> UndirectedGraph<'a, T> {
-    pub fn remove_node(&mut self, id: usize) -> Result<(), RemoveUndirectedGraphNodeError> {
-        if !self.base_graph.has_node(id) {
-            Err(RemoveUndirectedGraphNodeError::NodeDoesNotExist)
-        } else {
-            let node_ribs = self.base_graph.from_edges(id);
-            if !node_ribs.is_empty() {
-                Err(RemoveUndirectedGraphNodeError::NodeHasRibs(node_ribs))
-            } else {
-                self.base_graph.remove_node(id);
-                Ok(())
-            }
+impl Graph {
+    pub fn new(directed: bool) -> Self {
+        Graph {
+            edges: HashMap::new(),
+            directed,
         }
     }
 
-    pub fn add_rib(&mut self, first: usize, second: usize) -> Result<(), AddRibError> {
-        if !self.base_graph.has_node(first) {
-            Err(AddRibError::FirstNodeDoesNotExist)
-        } else if !self.base_graph.has_node(second) {
-            Err(AddRibError::SecondNodeDoesNotExist)
-        } else if self.base_graph.has_edge(first, second) {
-            Err(AddRibError::RibAlreadyExists)
-        } else {
-            self.base_graph.add_edge(first, second);
-            self.base_graph.add_edge(second, first);
-            Ok(())
-        }
+    pub fn add_node(&mut self, value: usize) {
+        self.edges.insert(value, HashSet::new());
     }
 
-    pub fn remove_rib(&mut self, first: usize, second: usize) -> Result<(), RemoveRibError> {
-        if !self.base_graph.has_node(first) {
-            Err(RemoveRibError::FirstNodeDoesNotExist)
-        } else if !self.base_graph.has_node(second) {
-            Err(RemoveRibError::SecondNodeDoesNotExist)
-        } else if !self.base_graph.has_edge(first, second) {
-            Err(RemoveRibError::RibDoesNotExist)
-        } else {
-            self.base_graph.remove_edge(first, second);
-            self.base_graph.remove_edge(second, first);
-            Ok(())
+    pub fn remove_node(&mut self, value: usize) -> Result<(), GraphRemoveNodeError> {
+        if !self.contains_node(value) {
+            return Err(GraphRemoveNodeError::NodeNotFound);
         }
+
+        self.edges.remove(&value);
+        for neighbours in self.edges.values_mut() {
+            neighbours.retain(|e| e.node != value);
+        }
+
+        Ok(())
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_bfs() {
-        let mut graph: BaseGraph<usize> = BaseGraph::new();
-        for i in 0..=5 {
-            graph.add_node(i);
+    pub fn add_edge(&mut self, from: usize, to: usize) -> Result<(), GraphAddEdgeError> {
+        if !self.directed {
+            return Err(GraphAddEdgeError::UndirectedGraph);
         }
 
-        for (from_node, to_nodes) in [
-            (0, vec![1, 2]),
-            (1, vec![3, 4]),
-            (2, vec![5]),
-            (3, vec![]),
-            (4, vec![]),
-            (5, vec![]),
-        ] {
-            for to_node in to_nodes {
-                graph.add_edge(from_node, to_node);
-            }
+        if !self.contains_node(from) {
+            return Err(GraphAddEdgeError::FromNodeDoesNotExist);
         }
 
-        let mut dfs = Vec::new();
-        graph.dfs(0, |node| dfs.push(*node));
+        if !self.contains_node(to) {
+            return Err(GraphAddEdgeError::ToNodeDoesNotExist);
+        }
 
-        assert_eq!(dfs, vec![0, 1, 4, 3, 2, 5]);
+        if self.contains_edge(from, to) {
+            return Err(GraphAddEdgeError::EdgeAlreadyExists);
+        }
+
+        self.edges
+            .entry(from)
+            .or_default()
+            .insert(Edge { node: to });
+
+        Ok(())
+    }
+
+    pub fn remove_edge(&mut self, from: usize, to: usize) -> Result<(), GraphRemoveEdgeError> {
+        if !self.contains_node(from) {
+            return Err(GraphRemoveEdgeError::FromNodeDoesNotExist);
+        }
+
+        if !self.contains_node(to) {
+            return Err(GraphRemoveEdgeError::ToNodeDoesNotExist);
+        }
+
+        if !self.contains_edge(from, to) {
+            return Err(GraphRemoveEdgeError::EdgeDoesNotExist);
+        }
+
+        self.edges.entry(from).or_default().retain(|e| e.node != to);
+
+        Ok(())
+    }
+
+    pub fn add_rib(&mut self, first: usize, second: usize) -> Result<(), GraphAddRibError> {
+        if !self.contains_node(first) {
+            return Err(GraphAddRibError::FirstNodeDoesNotExist);
+        }
+
+        if !self.contains_node(second) {
+            return Err(GraphAddRibError::SecondNodeDoesNotExist);
+        }
+
+        if self.contains_edge(first, second) || self.contains_edge(second, first) {
+            return Err(GraphAddRibError::RibAlreadyExists);
+        }
+
+        self.edges
+            .entry(first)
+            .or_default()
+            .insert(Edge { node: second });
+
+        self.edges
+            .entry(second)
+            .or_default()
+            .insert(Edge { node: first });
+
+        Ok(())
+    }
+
+    pub fn remove_rib(&mut self, first: usize, second: usize) -> Result<(), GraphRemoveRibError> {
+        if !self.contains_node(first) {
+            return Err(GraphRemoveRibError::FirstNodeDoesNotExist);
+        }
+
+        if !self.contains_node(second) {
+            return Err(GraphRemoveRibError::SecondNodeDoesNotExist);
+        }
+
+        if !self.contains_edge(first, second) || !self.contains_edge(second, first) {
+            return Err(GraphRemoveRibError::RibDoesNotExist);
+        }
+
+        self.edges
+            .entry(first)
+            .or_default()
+            .retain(|e| e.node != second);
+
+        self.edges
+            .entry(second)
+            .or_default()
+            .retain(|e| e.node != first);
+
+        Ok(())
+    }
+
+    pub fn contains_node(&self, node: usize) -> bool {
+        self.edges.contains_key(&node)
+    }
+
+    pub fn contains_edge(&self, from: usize, to: usize) -> bool {
+        self.edges[&from].contains(&Edge { node: to })
     }
 }

@@ -8,14 +8,10 @@ use crate::{
         },
         print_graph::print_graph,
     },
-    graph::BaseGraph,
+    graph::Graph,
 };
 
-pub fn dispatch_cmd(
-    cmd_parts: &[String],
-    mut graph: &mut BaseGraph<i32>,
-    directed: bool,
-) -> Result<bool, String> {
+pub fn dispatch_cmd(cmd_parts: &[String], mut graph: &mut Graph) -> Result<bool, String> {
     let Some(cmd) = cmd_parts.get(0) else {
         return Err("Вы должны указать команду".to_string());
     };
@@ -23,22 +19,20 @@ pub fn dispatch_cmd(
     match cmd.as_str() {
         "print" => Ok(print_graph(&graph)),
         "clean" => {
-            *graph = BaseGraph::new();
+            *graph = Graph::new(graph.directed);
             Ok(print_graph(&graph))
         }
         "add_node" => add_node_cmd(cmd_parts, &mut graph),
-        "remove_node" => remove_node_cmd(cmd_parts, &mut graph, directed),
-        "add_arc" => add_arc_cmd(cmd_parts, &mut graph, directed),
-        "add_rib" => add_rib_cmd(cmd_parts, &mut graph, directed),
-        "remove_arc" => remove_arc_cmd(cmd_parts, &mut graph, directed),
-        "remove_rib" => remove_rib_cmd(cmd_parts, &mut graph, directed),
-        "out_degree" => out_degree_cmd(cmd_parts, &mut graph, directed),
-        "in_degree" => in_degree_cmd(cmd_parts, &mut graph, directed),
-        "node_with_greater_outdegree" => {
-            node_with_greater_outdegree_cmd(cmd_parts, &mut graph, directed)
-        }
-        "sym_diff" => sym_diff_cmd(cmd_parts, &mut graph, directed),
-        "save" => save_cmd(cmd_parts, &mut graph, directed),
+        "remove_node" => remove_node_cmd(cmd_parts, &mut graph),
+        "add_arc" => add_arc_cmd(cmd_parts, &mut graph),
+        "add_rib" => add_rib_cmd(cmd_parts, &mut graph),
+        "remove_arc" => remove_arc_cmd(cmd_parts, &mut graph),
+        "remove_rib" => remove_rib_cmd(cmd_parts, &mut graph),
+        "out_degree" => out_degree_cmd(cmd_parts, &mut graph),
+        "in_degree" => in_degree_cmd(cmd_parts, &mut graph),
+        "node_with_greater_outdegree" => node_with_greater_outdegree_cmd(cmd_parts, &mut graph),
+        "sym_diff" => sym_diff_cmd(cmd_parts, &mut graph),
+        "save" => save_cmd(cmd_parts, &mut graph),
         "exit" => {
             println!("Good luck with that!");
             return Ok(false);

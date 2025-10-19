@@ -1,6 +1,6 @@
-use crate::{cli::print_graph::print_graph, graph::BaseGraph};
+use crate::{cli::print_graph::print_graph, graph::Graph};
 
-pub fn add_node_cmd(cmd_parts: &[String], graph: &mut BaseGraph<i32>) -> Result<bool, String> {
+pub fn add_node_cmd(cmd_parts: &[String], graph: &mut Graph) -> Result<bool, String> {
     let Some(value) = cmd_parts.get(1) else {
         return Err("Вы должны указать значение".to_string());
     };

@@ -1,8 +1,8 @@
 use std::io::Write;
 
-use crate::{cli::dispatch_cmd::dispatch_cmd, graph::BaseGraph};
+use crate::{cli::dispatch_cmd::dispatch_cmd, graph::Graph};
 
-pub fn cmd_loop(mut graph: BaseGraph<i32>, directed: bool) {
+pub fn cmd_loop(mut graph: Graph) {
     loop {
         print!("> ");
         std::io::stdout().flush().unwrap();
@@ -15,7 +15,7 @@ pub fn cmd_loop(mut graph: BaseGraph<i32>, directed: bool) {
             .map(|s| s.to_string())
             .collect();
 
-        match dispatch_cmd(&input, &mut graph, directed) {
+        match dispatch_cmd(&input, &mut graph) {
             Ok(true) => continue,
             Ok(false) => break,
             Err(e) => eprintln!("{e}"),

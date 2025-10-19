@@ -1,9 +1,6 @@
-use crate::graph::BaseGraph;
+use crate::graph::Graph;
 
-pub fn print_graph<T>(graph: &BaseGraph<T>) -> bool
-where
-    T: std::fmt::Debug + std::hash::Hash + Eq,
-{
+pub fn print_graph(graph: &Graph) -> bool {
     println!("{graph:#?}");
     true
 }

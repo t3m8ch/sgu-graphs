@@ -1,16 +1,9 @@
 use crate::{
     cli::print_graph::print_graph,
-    graph::{BaseGraph, DirectedGraph, RemoveArcError},
+    graph::{Graph, GraphRemoveRibError},
 };
 
-pub fn remove_rib_cmd(
-    cmd_parts: &[String],
-    graph: &mut BaseGraph<i32>,
-    directed: bool,
-) -> Result<bool, String> {
-    if directed {
-        return Err("Граф ориентированный, удаление рёбер не поддерживается".to_string());
-    }
+pub fn remove_rib_cmd(cmd_parts: &[String], graph: &mut Graph) -> Result<bool, String> {
     let Some(first) = cmd_parts.get(1) else {
         return Err("Вы должны указать первую вершину".to_string());
     };
@@ -23,14 +16,18 @@ pub fn remove_rib_cmd(
     let Ok(second) = second.trim().parse() else {
         return Err("Вторая вершина должна быть числом".to_string());
     };
-    let mut directed_graph: DirectedGraph<i32> = graph.into();
-    match directed_graph.remove_arc(first, second) {
+
+    match graph.remove_rib(first, second) {
         Ok(_) => Ok(print_graph(&graph)),
         Err(e) => match e {
-            RemoveArcError::FromNodeDoesNotExist => Err("Первая вершина не существует".to_string()),
-            RemoveArcError::ToNodeDoesNotExist => Err("Вторая вершина не существует".to_string()),
-            RemoveArcError::ArcDoesNotExist => {
-                Err("Дуги между вершинами не существует".to_string())
+            GraphRemoveRibError::FirstNodeDoesNotExist => {
+                Err("Первая вершина не существует".to_string())
+            }
+            GraphRemoveRibError::SecondNodeDoesNotExist => {
+                Err("Вторая вершина не существует".to_string())
+            }
+            GraphRemoveRibError::RibDoesNotExist => {
+                Err("Ребра между вершинами не существует".to_string())
             }
         },
     }
