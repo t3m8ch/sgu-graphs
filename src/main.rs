@@ -1,6 +1,7 @@
 use std::io::Write;
 
 use crate::{
+    cli::ask_bool::ask_bool,
     files::{GraphSave, load_graph, save_graph},
     graph::{
         AddArcError, AddRibError, BaseGraph, DirectedGraph, InDegreeError,
@@ -9,6 +10,7 @@ use crate::{
     },
 };
 
+pub mod cli;
 pub mod files;
 pub mod graph;
 
@@ -448,23 +450,4 @@ where
 {
     println!("{graph:#?}");
     true
-}
-
-fn ask_bool(msg: &str) -> bool {
-    loop {
-        print!("{} (yes/no): ", msg);
-        std::io::stdout().flush().unwrap();
-
-        let mut input = String::new();
-        std::io::stdin().read_line(&mut input).unwrap();
-
-        let input = input.trim().to_lowercase();
-        match input.as_str() {
-            "yes" => break true,
-            "no" => break false,
-            _ => {
-                println!("Некорректный ввод.");
-            }
-        }
-    }
 }
