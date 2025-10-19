@@ -9,6 +9,7 @@ use crate::{
         print_graph::print_graph,
     },
     graph::Graph,
+    tasks::task5::scc_count,
 };
 
 pub fn dispatch_cmd(cmd_parts: &[String], mut graph: &mut Graph) -> Result<bool, String> {
@@ -32,6 +33,10 @@ pub fn dispatch_cmd(cmd_parts: &[String], mut graph: &mut Graph) -> Result<bool,
         "in_degree" => in_degree_cmd(cmd_parts, &mut graph),
         "node_with_greater_outdegree" => node_with_greater_outdegree_cmd(cmd_parts, &mut graph),
         "sym_diff" => sym_diff_cmd(cmd_parts, &mut graph),
+        "scc_count" => {
+            println!("Количество сильно связных компонент: {}", scc_count(&graph));
+            Ok(true)
+        }
         "save" => save_cmd(cmd_parts, &mut graph),
         "exit" => {
             println!("Good luck with that!");
