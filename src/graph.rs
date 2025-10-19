@@ -1,14 +1,21 @@
 use std::collections::{HashMap, HashSet};
 
+use bon::Builder;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 // Сюда в будущем будут добавляться свойства рёбер/дуг
-#[derive(Derivative, Serialize, Deserialize)]
+#[derive(Derivative, Serialize, Deserialize, Builder)]
 #[derivative(Clone, Debug, PartialEq, Eq, Hash)]
+#[builder(start_fn = value)]
 pub struct Edge {
+    #[builder(start_fn)]
     pub node: usize,
+
+    #[derivative(PartialEq = "ignore", Hash = "ignore")]
+    #[builder(default = 1)]
+    pub weight: i32,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -122,7 +129,7 @@ impl Graph {
         self.edges
             .entry(from)
             .or_default()
-            .insert(Edge { node: to });
+            .insert(Edge::value(to).build());
 
         Ok(())
     }
@@ -161,12 +168,12 @@ impl Graph {
         self.edges
             .entry(first)
             .or_default()
-            .insert(Edge { node: second });
+            .insert(Edge::value(second).build());
 
         self.edges
             .entry(second)
             .or_default()
-            .insert(Edge { node: first });
+            .insert(Edge::value(first).build());
 
         Ok(())
     }
@@ -202,6 +209,6 @@ impl Graph {
     }
 
     pub fn contains_edge(&self, from: usize, to: usize) -> bool {
-        self.edges[&from].contains(&Edge { node: to })
+        self.edges[&from].contains(&Edge::value(to).build())
     }
 }

@@ -61,10 +61,10 @@ mod tests {
         let mut graph = Graph::new(true);
 
         graph.edges = hashmap! {
-            1 => hashset! { Edge { node: 3 } },
-            2 => hashset! { Edge { node: 3 } },
-            3 => hashset! { Edge { node: 4 }, Edge { node: 5 } },
-            4 => hashset! { Edge { node: 5 } },
+            1 => hashset! { Edge::value(3).build() },
+            2 => hashset! { Edge::value(3).build() },
+            3 => hashset! { Edge::value(4).build(), Edge::value(5).build() },
+            4 => hashset! { Edge::value(5).build() },
             5 => HashSet::new()
         };
 
@@ -76,10 +76,10 @@ mod tests {
         let mut graph = Graph::new(true);
 
         graph.edges = hashmap! {
-            0 => hashset! { Edge { node: 1 } },
-            1 => hashset! { Edge { node: 2 } },
-            2 => hashset! { Edge { node: 3 } },
-            3 => hashset! { Edge { node: 1 } },
+            0 => hashset! { Edge::value(1).build() },
+            1 => hashset! { Edge::value(2).build() },
+            2 => hashset! { Edge::value(3).build() },
+            3 => hashset! { Edge::value(1).build() },
         };
 
         assert!(!is_acyclic(&graph).unwrap());

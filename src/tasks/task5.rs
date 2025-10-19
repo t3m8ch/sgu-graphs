@@ -81,7 +81,7 @@ fn transpose(graph: &mut Graph) {
         .fold(HashMap::new(), |mut acc, (key, value)| {
             acc.entry(key)
                 .or_insert_with(HashSet::new)
-                .insert(Edge { node: value });
+                .insert(Edge::value(value).build());
             acc
         });
 }
@@ -110,8 +110,8 @@ mod tests {
         assert_eq!(
             graph.edges,
             hashmap! {
-                1 => hashset! {Edge { node: 0 }, Edge { node: 2 }},
-                2 => hashset! {Edge { node: 0 }, Edge { node: 1 }}
+                1 => hashset! {Edge::value(0).build(), Edge::value(2).build()},
+                2 => hashset! {Edge::value(0).build(), Edge::value(1).build()}
             }
         )
     }
@@ -121,10 +121,10 @@ mod tests {
         let mut graph = Graph::new(true);
 
         graph.edges = hashmap! {
-            0 => hashset! { Edge { node: 1 }, Edge { node: 2 }, Edge { node: 3 } },
-            1 => hashset! { Edge { node: 3 }, Edge { node: 4 } },
-            2 => hashset! { Edge { node: 3 } },
-            3 => hashset! { Edge { node: 1 }, Edge { node: 4 } },
+            0 => hashset! { Edge::value(1).build(), Edge::value(2).build(), Edge::value(3).build() },
+            1 => hashset! { Edge::value(3).build(), Edge::value(4).build() },
+            2 => hashset! { Edge::value(3).build() },
+            3 => hashset! { Edge::value(1).build(), Edge::value(4).build() },
             4 => HashSet::new(),
             5 => HashSet::new(),
         };
@@ -148,15 +148,15 @@ mod tests {
         let mut graph = Graph::new(true);
 
         graph.edges = hashmap! {
-            0 => hashset! { Edge { node: 1 } },
-            1 => hashset! { Edge { node: 2 } },
-            2 => hashset! { Edge { node: 0 } },
-            3 => hashset! { Edge { node: 2 }, Edge { node: 4 } },
-            4 => hashset! { Edge { node: 7 }, Edge { node: 3 } },
-            5 => hashset! { Edge { node: 7 } },
-            6 => hashset! { Edge { node: 5 }, Edge { node: 8 } },
-            7 => hashset! { Edge { node: 6 } },
-            8 => hashset! { Edge { node: 7 } },
+            0 => hashset! { Edge::value(1).build() },
+            1 => hashset! { Edge::value(2).build() },
+            2 => hashset! { Edge::value(0).build() },
+            3 => hashset! { Edge::value(2).build(), Edge::value(4).build() },
+            4 => hashset! { Edge::value(7).build(), Edge::value(3).build() },
+            5 => hashset! { Edge::value(7).build() },
+            6 => hashset! { Edge::value(5).build(), Edge::value(8).build() },
+            7 => hashset! { Edge::value(6).build() },
+            8 => hashset! { Edge::value(7).build() },
         };
 
         assert_eq!(scc_count(&graph), 3);

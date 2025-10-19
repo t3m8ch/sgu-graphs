@@ -53,7 +53,7 @@ pub fn get_incoming_nodes(graph: &Graph, node: usize) -> Result<Vec<usize>, Inco
         .edges
         .iter()
         .filter_map(|(from_node, to_nodes)| {
-            if to_nodes.contains(&Edge { node }) {
+            if to_nodes.contains(&Edge::value(node).build()) {
                 Some(*from_node)
             } else {
                 None
