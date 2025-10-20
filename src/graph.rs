@@ -84,6 +84,7 @@ pub enum GraphRemoveRibError {
     RibDoesNotExist,
 }
 
+// TODO: Добавить total_weight
 impl Graph {
     pub fn new(directed: bool) -> Self {
         Graph {
@@ -93,7 +94,7 @@ impl Graph {
     }
 
     pub fn add_node(&mut self, value: usize) {
-        self.edges.insert(value, HashSet::new());
+        self.edges.entry(value).or_insert_with(HashSet::new);
     }
 
     pub fn remove_node(&mut self, value: usize) -> Result<(), GraphRemoveNodeError> {
@@ -152,7 +153,12 @@ impl Graph {
         Ok(())
     }
 
-    pub fn add_rib(&mut self, first: usize, second: usize) -> Result<(), GraphAddRibError> {
+    pub fn add_rib(
+        &mut self,
+        first: usize,
+        second: usize,
+        weight: i32,
+    ) -> Result<(), GraphAddRibError> {
         if !self.contains_node(first) {
             return Err(GraphAddRibError::FirstNodeDoesNotExist);
         }
@@ -168,12 +174,12 @@ impl Graph {
         self.edges
             .entry(first)
             .or_default()
-            .insert(Edge::value(second).build());
+            .insert(Edge::value(second).weight(weight).build());
 
         self.edges
             .entry(second)
             .or_default()
-            .insert(Edge::value(first).build());
+            .insert(Edge::value(first).weight(weight).build());
 
         Ok(())
     }

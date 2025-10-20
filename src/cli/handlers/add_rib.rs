@@ -16,7 +16,10 @@ pub fn add_rib_cmd(cmd_parts: &[String], graph: &mut Graph) -> Result<bool, Stri
     let Ok(second) = second.trim().parse() else {
         return Err("Вторая вершина должна быть числом".to_string());
     };
-    match graph.add_rib(first, second) {
+    let Ok(weight) = cmd_parts.get(3).unwrap_or(&"1".to_string()).trim().parse() else {
+        return Err("Вес ребра должен быть целым числом".to_string());
+    };
+    match graph.add_rib(first, second, weight) {
         Ok(_) => Ok(print_graph(&graph)),
         Err(e) => match e {
             GraphAddRibError::FirstNodeDoesNotExist => {
