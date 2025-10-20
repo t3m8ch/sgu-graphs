@@ -15,7 +15,12 @@ pub struct Edge {
 
     #[derivative(PartialEq = "ignore", Hash = "ignore")]
     #[builder(default = 1)]
+    #[serde(default = "default_weight")]
     pub weight: i32,
+}
+
+fn default_weight() -> i32 {
+    1
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
