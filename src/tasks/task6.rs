@@ -32,6 +32,9 @@ pub fn is_acyclic(graph: &Graph) -> Result<bool, IsAcyclicError> {
         }
     }
 
+    // TODO: Учитывать изолированные вершины и другие компоненты связности
+    // (мы должны проверять все компоненты, есть ли в них циклы)
+
     while let Some(node) = queue.pop_front() {
         visited_count += 1;
         for neighbour in graph.edges.get(&node).unwrap() {
