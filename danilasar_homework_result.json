@@ -1,0 +1,57 @@
+{
+  "edges": {
+    "3": [
+      {
+        "node": 2,
+        "weight": 7
+      }
+    ],
+    "1": [
+      {
+        "node": 6,
+        "weight": 4
+      },
+      {
+        "node": 2,
+        "weight": 8
+      }
+    ],
+    "6": [
+      {
+        "node": 1,
+        "weight": 4
+      },
+      {
+        "node": 5,
+        "weight": 3
+      }
+    ],
+    "5": [
+      {
+        "node": 6,
+        "weight": 3
+      },
+      {
+        "node": 4,
+        "weight": 6
+      }
+    ],
+    "4": [
+      {
+        "node": 5,
+        "weight": 6
+      }
+    ],
+    "2": [
+      {
+        "node": 1,
+        "weight": 8
+      },
+      {
+        "node": 3,
+        "weight": 7
+      }
+    ]
+  },
+  "directed": false
+}
