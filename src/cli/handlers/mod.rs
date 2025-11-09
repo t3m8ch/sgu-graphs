@@ -3,6 +3,7 @@ pub mod add_node;
 pub mod add_rib;
 pub mod in_degree;
 pub mod is_acyclic;
+pub mod min_dist;
 pub mod min_len;
 pub mod mst_prim;
 pub mod node_with_greater_outdegree;

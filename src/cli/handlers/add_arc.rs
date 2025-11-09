@@ -17,7 +17,13 @@ pub fn add_arc_cmd(cmd_parts: &[String], graph: &mut Graph) -> Result<bool, Stri
         return Err("Конечная вершина должна быть числом".to_string());
     };
 
-    match graph.add_edge(from, to) {
+    let weight = match cmd_parts.get(3).map(|w| w.parse()) {
+        Some(Ok(weight)) => weight,
+        Some(Err(_)) => return Err("Вес должен быть числом".to_string()),
+        None => 1,
+    };
+
+    match graph.add_edge(from, to, weight) {
         Ok(_) => Ok(print_graph(&graph)),
         Err(e) => match e {
             GraphAddEdgeError::FromNodeDoesNotExist => {

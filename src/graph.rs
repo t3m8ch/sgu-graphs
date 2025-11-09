@@ -115,7 +115,12 @@ impl Graph {
         Ok(())
     }
 
-    pub fn add_edge(&mut self, from: usize, to: usize) -> Result<(), GraphAddEdgeError> {
+    pub fn add_edge(
+        &mut self,
+        from: usize,
+        to: usize,
+        weight: i32,
+    ) -> Result<(), GraphAddEdgeError> {
         if !self.directed {
             return Err(GraphAddEdgeError::UndirectedGraph);
         }
@@ -135,7 +140,7 @@ impl Graph {
         self.edges
             .entry(from)
             .or_default()
-            .insert(Edge::value(to).build());
+            .insert(Edge::value(to).weight(weight).build());
 
         Ok(())
     }
