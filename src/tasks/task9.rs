@@ -8,7 +8,7 @@ use thiserror::Error;
 use crate::graph::Graph;
 
 #[derive(Debug, Clone, Error)]
-pub enum BellmanFordError {
+pub enum MinDistanceError {
     #[error("Negative cycle detected")]
     NegativeCycle,
 
@@ -16,7 +16,7 @@ pub enum BellmanFordError {
     EmptyGraph,
 }
 
-pub fn min_distance(graph: &Graph) -> Result<(usize, i32), BellmanFordError> {
+pub fn min_distance(graph: &Graph) -> Result<(usize, i32), MinDistanceError> {
     let results = graph
         .edges
         .keys()
@@ -24,10 +24,10 @@ pub fn min_distance(graph: &Graph) -> Result<(usize, i32), BellmanFordError> {
         .map(|(node, distances)| distances.map(|d| (node, d.values().sum())));
 
     process_results(results, |iter| iter.min_by_key(|(_, sum)| *sum))?
-        .ok_or(BellmanFordError::EmptyGraph)
+        .ok_or(MinDistanceError::EmptyGraph)
 }
 
-fn bellman_ford(graph: &Graph, source: usize) -> Result<HashMap<usize, i32>, BellmanFordError> {
+fn bellman_ford(graph: &Graph, source: usize) -> Result<HashMap<usize, i32>, MinDistanceError> {
     let mut distances = HashMap::new();
     distances.insert(source, 0);
 
@@ -63,7 +63,7 @@ fn bellman_ford(graph: &Graph, source: usize) -> Result<HashMap<usize, i32>, Bel
         let new_dist = from_dist + weight;
         let curr_dist = *distances.get(to).unwrap_or(&i32::MAX);
         if new_dist < curr_dist {
-            return Err(BellmanFordError::NegativeCycle);
+            return Err(MinDistanceError::NegativeCycle);
         }
     }
 

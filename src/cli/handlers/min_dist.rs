@@ -1,6 +1,6 @@
 use crate::{
     graph::Graph,
-    tasks::task9::{BellmanFordError, min_distance},
+    tasks::task9::{MinDistanceError, min_distance},
 };
 
 pub fn min_dist_cmd(graph: &Graph) -> Result<bool, String> {
@@ -10,10 +10,10 @@ pub fn min_dist_cmd(graph: &Graph) -> Result<bool, String> {
             Ok(true)
         }
         Err(e) => match e {
-            BellmanFordError::NegativeCycle => {
+            MinDistanceError::NegativeCycle => {
                 Err("Граф содержит цикл с отрицательным весом".to_string())
             }
-            BellmanFordError::EmptyGraph => {
+            MinDistanceError::EmptyGraph => {
                 Err("Невозможно запустить для пустого графа".to_string())
             }
         },
