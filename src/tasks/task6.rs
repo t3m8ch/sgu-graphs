@@ -32,9 +32,6 @@ pub fn is_acyclic(graph: &Graph) -> Result<bool, IsAcyclicError> {
         }
     }
 
-    // TODO: Учитывать изолированные вершины и другие компоненты связности
-    // (мы должны проверять все компоненты, есть ли в них циклы)
-
     while let Some(node) = queue.pop_front() {
         visited_count += 1;
         for neighbour in graph.edges.get(&node).unwrap() {
@@ -83,6 +80,37 @@ mod tests {
             1 => hashset! { Edge::value(2).build() },
             2 => hashset! { Edge::value(3).build() },
             3 => hashset! { Edge::value(1).build() },
+        };
+
+        assert!(!is_acyclic(&graph).unwrap());
+    }
+
+    #[test]
+    fn test_is_acyclic_isolated_nodes() {
+        let mut graph = Graph::new(true);
+
+        graph.edges = hashmap! {
+            0 => HashSet::new(),
+            1 => hashset! { Edge::value(2).build() },
+            2 => hashset! { Edge::value(3).build() },
+            3 => hashset! { Edge::value(4).build() },
+            4 => hashset! { Edge::value(2).build() },
+        };
+
+        assert!(!is_acyclic(&graph).unwrap());
+    }
+
+    #[test]
+    fn test_is_acyclic_two_components() {
+        let mut graph = Graph::new(true);
+
+        graph.edges = hashmap! {
+            1 => hashset! { Edge::value(2).build(), Edge::value(3).build() },
+            2 => hashset! { Edge::value(3).build() },
+            3 => HashSet::new(),
+            4 => hashset! { Edge::value(5).build() },
+            5 => hashset! { Edge::value(6).build() },
+            6 => hashset! { Edge::value(4).build() },
         };
 
         assert!(!is_acyclic(&graph).unwrap());
