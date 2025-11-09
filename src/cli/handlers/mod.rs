@@ -6,6 +6,7 @@ pub mod is_acyclic;
 pub mod min_dist;
 pub mod min_len;
 pub mod mst_prim;
+pub mod n_per;
 pub mod node_with_greater_outdegree;
 pub mod out_degree;
 pub mod remove_arc;
