@@ -1,6 +1,7 @@
 pub mod add_arc;
 pub mod add_node;
 pub mod add_rib;
+pub mod ford_fulkerson;
 pub mod in_degree;
 pub mod is_acyclic;
 pub mod min_dist;

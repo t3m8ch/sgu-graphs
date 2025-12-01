@@ -19,7 +19,14 @@ pub fn add_rib_cmd(cmd_parts: &[String], graph: &mut Graph) -> Result<bool, Stri
     let Ok(weight) = cmd_parts.get(3).unwrap_or(&"1".to_string()).trim().parse() else {
         return Err("Вес ребра должен быть целым числом".to_string());
     };
-    match graph.add_rib(first, second, weight) {
+
+    let capacity = match cmd_parts.get(4).map(|c| c.parse()) {
+        Some(Ok(capacity)) => capacity,
+        Some(Err(_)) => return Err("Пропускная способность ребра должна быть числом".to_string()),
+        None => 1,
+    };
+
+    match graph.add_rib(first, second, weight, capacity) {
         Ok(_) => Ok(print_graph(&graph)),
         Err(e) => match e {
             GraphAddRibError::FirstNodeDoesNotExist => {

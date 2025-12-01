@@ -23,7 +23,13 @@ pub fn add_arc_cmd(cmd_parts: &[String], graph: &mut Graph) -> Result<bool, Stri
         None => 1,
     };
 
-    match graph.add_edge(from, to, weight) {
+    let capacity = match cmd_parts.get(4).map(|c| c.parse()) {
+        Some(Ok(capacity)) => capacity,
+        Some(Err(_)) => return Err("Пропускная способность ребра должна быть числом".to_string()),
+        None => 1,
+    };
+
+    match graph.add_edge(from, to, weight, capacity) {
         Ok(_) => Ok(print_graph(&graph)),
         Err(e) => match e {
             GraphAddEdgeError::FromNodeDoesNotExist => {

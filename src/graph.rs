@@ -17,9 +17,18 @@ pub struct Edge {
     #[builder(default = 1)]
     #[serde(default = "default_weight")]
     pub weight: i32,
+
+    #[derivative(PartialEq = "ignore", Hash = "ignore")]
+    #[builder(default = 1)]
+    #[serde(default = "default_capacity")]
+    pub capacity: i32,
 }
 
 fn default_weight() -> i32 {
+    1
+}
+
+fn default_capacity() -> i32 {
     1
 }
 
@@ -120,6 +129,7 @@ impl Graph {
         from: usize,
         to: usize,
         weight: i32,
+        capacity: i32,
     ) -> Result<(), GraphAddEdgeError> {
         if !self.directed {
             return Err(GraphAddEdgeError::UndirectedGraph);
@@ -140,7 +150,7 @@ impl Graph {
         self.edges
             .entry(from)
             .or_default()
-            .insert(Edge::value(to).weight(weight).build());
+            .insert(Edge::value(to).weight(weight).capacity(capacity).build());
 
         Ok(())
     }
@@ -168,6 +178,7 @@ impl Graph {
         first: usize,
         second: usize,
         weight: i32,
+        capacity: i32,
     ) -> Result<(), GraphAddRibError> {
         if !self.contains_node(first) {
             return Err(GraphAddRibError::FirstNodeDoesNotExist);
@@ -181,15 +192,17 @@ impl Graph {
             return Err(GraphAddRibError::RibAlreadyExists);
         }
 
-        self.edges
-            .entry(first)
-            .or_default()
-            .insert(Edge::value(second).weight(weight).build());
+        self.edges.entry(first).or_default().insert(
+            Edge::value(second)
+                .weight(weight)
+                .capacity(capacity)
+                .build(),
+        );
 
         self.edges
             .entry(second)
             .or_default()
-            .insert(Edge::value(first).weight(weight).build());
+            .insert(Edge::value(first).weight(weight).capacity(capacity).build());
 
         Ok(())
     }

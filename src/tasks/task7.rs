@@ -43,7 +43,7 @@ pub fn mst_prim(graph: &Graph, start_node: usize) -> Result<Graph, MstPrimError>
 
         mst.add_node(from);
         mst.add_node(to);
-        mst.add_rib(from, to, weight).unwrap();
+        mst.add_rib(from, to, weight, 1).unwrap();
         visited.insert(to);
 
         for neighbour in graph.edges.get(&to).unwrap() {
@@ -68,25 +68,25 @@ mod tests {
             graph.add_node(i);
         }
 
-        graph.add_rib(1, 2, 4).unwrap();
-        graph.add_rib(1, 3, 2).unwrap();
-        graph.add_rib(2, 3, 1).unwrap();
-        graph.add_rib(2, 4, 5).unwrap();
-        graph.add_rib(3, 4, 8).unwrap();
-        graph.add_rib(3, 5, 10).unwrap();
-        graph.add_rib(4, 5, 2).unwrap();
-        graph.add_rib(4, 6, 6).unwrap();
-        graph.add_rib(5, 6, 3).unwrap();
+        graph.add_rib(1, 2, 4, 1).unwrap();
+        graph.add_rib(1, 3, 2, 1).unwrap();
+        graph.add_rib(2, 3, 1, 1).unwrap();
+        graph.add_rib(2, 4, 5, 1).unwrap();
+        graph.add_rib(3, 4, 8, 1).unwrap();
+        graph.add_rib(3, 5, 10, 1).unwrap();
+        graph.add_rib(4, 5, 2, 1).unwrap();
+        graph.add_rib(4, 6, 6, 1).unwrap();
+        graph.add_rib(5, 6, 3, 1).unwrap();
 
         let mut expected_mst = Graph::new(false);
         for i in 1..=6 {
             expected_mst.add_node(i);
         }
-        expected_mst.add_rib(1, 3, 2).unwrap();
-        expected_mst.add_rib(3, 2, 1).unwrap();
-        expected_mst.add_rib(2, 4, 5).unwrap();
-        expected_mst.add_rib(4, 5, 2).unwrap();
-        expected_mst.add_rib(5, 6, 3).unwrap();
+        expected_mst.add_rib(1, 3, 2, 1).unwrap();
+        expected_mst.add_rib(3, 2, 1, 1).unwrap();
+        expected_mst.add_rib(2, 4, 5, 1).unwrap();
+        expected_mst.add_rib(4, 5, 2, 1).unwrap();
+        expected_mst.add_rib(5, 6, 3, 1).unwrap();
 
         let actual_mst = mst_prim(&graph, 1).unwrap();
 

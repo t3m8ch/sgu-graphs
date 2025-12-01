@@ -87,14 +87,14 @@ mod tests {
         graph.add_node(4);
         graph.add_node(5);
 
-        graph.add_edge(0, 1, -1).unwrap();
-        graph.add_edge(0, 2, 4).unwrap();
-        graph.add_edge(1, 2, 3).unwrap();
-        graph.add_edge(1, 3, 2).unwrap();
-        graph.add_edge(1, 4, 2).unwrap();
-        graph.add_edge(3, 2, 5).unwrap();
-        graph.add_edge(3, 1, 1).unwrap();
-        graph.add_edge(4, 3, -3).unwrap();
+        graph.add_edge(0, 1, -1, 1).unwrap();
+        graph.add_edge(0, 2, 4, 1).unwrap();
+        graph.add_edge(1, 2, 3, 1).unwrap();
+        graph.add_edge(1, 3, 2, 1).unwrap();
+        graph.add_edge(1, 4, 2, 1).unwrap();
+        graph.add_edge(3, 2, 5, 1).unwrap();
+        graph.add_edge(3, 1, 1, 1).unwrap();
+        graph.add_edge(4, 3, -3, 1).unwrap();
 
         let result = bellman_ford(&graph, 0).unwrap();
 

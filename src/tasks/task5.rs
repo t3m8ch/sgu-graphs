@@ -100,10 +100,10 @@ mod tests {
         graph.add_node(1);
         graph.add_node(2);
 
-        graph.add_edge(0, 1, 1).unwrap();
-        graph.add_edge(0, 2, 1).unwrap();
-        graph.add_edge(1, 2, 1).unwrap();
-        graph.add_edge(2, 1, 1).unwrap();
+        graph.add_edge(0, 1, 1, 1).unwrap();
+        graph.add_edge(0, 2, 1, 1).unwrap();
+        graph.add_edge(1, 2, 1, 1).unwrap();
+        graph.add_edge(2, 1, 1, 1).unwrap();
 
         transpose(&mut graph);
 
