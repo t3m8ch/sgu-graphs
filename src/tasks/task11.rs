@@ -48,7 +48,7 @@ pub fn ford_fulkerson(graph: &Graph, source: usize, sink: usize) -> i32 {
         max_flow += path_flow;
     }
 
-    return max_flow;
+    max_flow
 }
 
 fn bfs(
